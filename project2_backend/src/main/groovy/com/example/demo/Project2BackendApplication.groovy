@@ -14,7 +14,6 @@ class Project2BackendApplication {
     String home() {
         return "Hello World!";
     }
-
 	static void main(String[] args) {
 		SpringApplication.run(Project2BackendApplication, args)
 	}
