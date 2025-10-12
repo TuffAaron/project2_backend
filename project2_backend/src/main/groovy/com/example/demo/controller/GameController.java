@@ -20,8 +20,22 @@ public class GameController {
     @Autowired
     private GameService gameService;
 
+    @GetMapping("/test")
+    public String testEndpoint() {
+        return "API is working! GameController is responding.";
+    }
+
+    @GetMapping("/all")
+    public List<Game> getAllGames() {
+        return gameService.getAllGames();
+    }
+
     @GetMapping("/team/{teamId}")
     public List<Game> getGamesByTeam(@PathVariable Long teamId){
-        return gameService.getGamesByTeam(teamId);
+        try {
+            return gameService.getGamesByTeam(teamId);
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching games for team " + teamId + ": " + e.getMessage());
+        }
     }
 }

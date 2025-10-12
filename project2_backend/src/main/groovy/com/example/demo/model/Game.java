@@ -53,7 +53,7 @@ public class Game {
     @Column(name = "home_team_time")
     private ZonedDateTime homeTeamTime;
 
-    @Column(name = "day")
+    @Column(name = "game_day")
     private String day;
 
     @Column(name = "month_num")
