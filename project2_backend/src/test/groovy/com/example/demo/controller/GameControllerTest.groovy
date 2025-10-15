@@ -133,7 +133,7 @@ class GameControllerTest {
         mockMvc.perform(get("/api/games/team/{teamId}", teamId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath('$.length()').value(1))
-                .andExpected(jsonPath('$[0].gameId').value("GAME001"))
+                .andExpect(jsonPath('$[0].gameId').value("GAME001"))
         
         verify(gameService, times(1)).getGamesByTeam(teamId)
     }
