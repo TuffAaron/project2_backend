@@ -31,7 +31,7 @@ public class GameController {
     }
 
     @GetMapping("/team/{teamId}")
-    public List<Game> getGamesByTeam(@PathVariable Long teamId){
+    public List<Game> getGamesByTeam(@PathVariable("teamId") Long teamId){
         try {
             return gameService.getGamesByTeam(teamId);
         } catch (Exception e) {
