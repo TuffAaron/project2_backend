@@ -20,6 +20,17 @@ public class GameController {
     @Autowired
     private GameService gameService;
 
+    @GetMapping("/")
+    public String getApiRoutes() {
+        return "<h1>Game API Routes</h1>" +
+               "<ul>" +
+               "<li><a href='/api/games/test'>Test Endpoint</a> - Check if API is working</li>" +
+               "<li><a href='/api/games/all'>All Games</a> - Get all games</li>" +
+               "<li><a href='/api/games/team/{teamId}'>Games by Team</a> - Get games for a specific team (replace {teamId} with actual team ID)</li>" +
+               "</ul>" +
+               "<p>Example: <a href='/api/games/team/1'>Games for Team 1</a></p>";
+    }
+
     @GetMapping("/test")
     public String testEndpoint() {
         return "API is working! GameController is responding.";
@@ -31,7 +42,7 @@ public class GameController {
     }
 
     @GetMapping("/team/{teamId}")
-    public List<Game> getGamesByTeam(@PathVariable Long teamId){
+    public List<Game> getGamesByTeam(@PathVariable("teamId") Long teamId){
         try {
             return gameService.getGamesByTeam(teamId);
         } catch (Exception e) {
