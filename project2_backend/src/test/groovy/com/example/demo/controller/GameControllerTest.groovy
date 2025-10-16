@@ -9,33 +9,35 @@ import org.junit.jupiter.api.DisplayName
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.beans.factory.annotation.Autowired
 import static org.junit.jupiter.api.Assertions.*
 import static org.mockito.Mockito.*
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
-@SpringBootTest
+@WebMvcTest(GameController.class)
+@ActiveProfiles("test")
 @DisplayName("GameController Tests")
 class GameControllerTest {
 
+    @Autowired
     private MockMvc mockMvc
 
-    @Mock
+    @MockBean
     private GameService gameService
 
-    @InjectMocks
+    @Autowired
     private GameController gameController
 
     private List<Game> sampleGames
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this)
-        mockMvc = MockMvcBuilders.standaloneSetup(gameController).build()
-        
         // Create sample games for testing
         sampleGames = []
         
