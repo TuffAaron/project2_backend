@@ -2,11 +2,13 @@ package com.example.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Profile;
 import com.example.demo.model.Team;
 import com.example.demo.repository.TeamRepository;
 import java.util.List;
 
 @Service
+@Profile("!heroku")
 public class TeamService {
     
     @Autowired
