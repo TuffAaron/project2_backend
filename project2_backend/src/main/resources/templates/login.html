@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - OAuth2 Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .oauth-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin: 15px 0;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .oauth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .github-btn {
+            background: #24292e;
+            color: white;
+        }
+        .google-btn {
+            background: #db4437;
+            color: white;
+        }
+        .microsoft-btn {
+            background: #00a1f1;
+            color: white;
+        }
+        .discord-btn {
+            background: #5865f2;
+            color: white;
+        }
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .back-link {
+            margin-top: 30px;
+        }
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .provider-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Login with OAuth2</h1>
+        
+        <div th:if="${param.error}" class="error-message">
+            ❌ Authentication failed. Please try again.
+        </div>
+        
+        <p>Choose your preferred authentication provider:</p>
+        
+        <a href="/oauth2/authorization/github" class="oauth-btn github-btn">
+            <span class="provider-icon">🐙</span>
+            Continue with GitHub
+        </a>
+        
+        <a href="/oauth2/authorization/google" class="oauth-btn google-btn">
+            <span class="provider-icon">🔍</span>
+            Continue with Google
+        </a>
+        
+        <a href="/oauth2/authorization/microsoft" class="oauth-btn microsoft-btn">
+            <span class="provider-icon">🏢</span>
+            Continue with Microsoft
+        </a>
+        
+        <a href="/oauth2/authorization/discord" class="oauth-btn discord-btn">
+            <span class="provider-icon">🎮</span>
+            Continue with Discord
+        </a>
+        
+        <div class="back-link">
+            <a href="/">← Back to Home</a>
+        </div>
+        
+        <hr style="margin: 30px 0;">
+        
+        <p style="color: #666; font-size: 14px;">
+            <strong>Note:</strong> Make sure you have configured the OAuth2 client credentials in your environment file.
+        </p>
+    </div>
+</body>
+</html>
