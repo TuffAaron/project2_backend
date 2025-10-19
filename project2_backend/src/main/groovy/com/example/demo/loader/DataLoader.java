@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-@ConditionalOnProperty(name = "app.data.load.enabled", havingValue = "true", matchIfMissing = false)
 public class DataLoader implements CommandLineRunner {
 
     @Autowired
@@ -32,8 +30,8 @@ public class DataLoader implements CommandLineRunner {
 @Override
 public void run(String... args) throws Exception {
     try {
-        // Only load data if database is empty and we're not on Heroku
-        if (isDataLoadingEnabled() && isDatabaseEmpty()) {
+        // Only load data if database is empty
+        if (teamRepository.count() == 0) {
             System.out.println("Loading data from JSON...");
 
             loadScheduleData();
@@ -42,10 +40,13 @@ public void run(String... args) throws Exception {
             System.out.println("Total teams loaded: " + teamRepository.count());
             System.out.println("Total games loaded: " + gameRepository.count());
         } else {
-            System.out.println("Data loading skipped. Database may already contain data or loading is disabled.");
+            System.out.println("Database already contains data. Skipping data load.");
+            System.out.println("Existing teams: " + teamRepository.count());
+            System.out.println("Existing games: " + gameRepository.count());
         }
     } catch (Exception e) {
-        System.err.println("Error during data loading, continuing without data load: " + e.getMessage());
+        System.err.println("Error during data loading: " + e.getMessage());
+        e.printStackTrace();
         // Don't crash the application if data loading fails
     }
 }
@@ -206,22 +207,6 @@ public void run(String... args) throws Exception {
         } catch (Exception e) {
             System.err.println("Failed to parse datetime: " + dateTimeStr + " for field: " + fieldName);
             return null;
-        }
-    }
-
-    private boolean isDataLoadingEnabled() {
-        // Disable data loading on Heroku or when explicitly disabled
-        String herokuApp = System.getenv("HEROKU_APP_NAME");
-        String jawsdbUrl = System.getenv("JAWSDB_URL");
-        return herokuApp == null && jawsdbUrl == null;
-    }
-
-    private boolean isDatabaseEmpty() {
-        try {
-            return teamRepository.count() == 0;
-        } catch (Exception e) {
-            System.err.println("Could not check database status: " + e.getMessage());
-            return false;
         }
     }
 }
