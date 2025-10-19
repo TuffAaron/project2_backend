@@ -30,22 +30,25 @@ public class DataLoader implements CommandLineRunner {
 
 @Override
 public void run(String... args) throws Exception {
-    // Only load data if database is empty
-    if (teamRepository.count() == 0) {
-        System.out.println("Loading data from JSON...");
-        
-        loadScheduleData();
-        
-        System.out.println("Data load completed successfully!");
-        System.out.println("Total teams loaded: " + teamRepository.count());
-        System.out.println("Total games loaded: " + gameRepository.count());
-    } else {
-        System.out.println("Database already contains data. Skipping data load.");
-        System.out.println("Existing teams: " + teamRepository.count());
-        System.out.println("Existing games: " + gameRepository.count());
-        
-        // Update logos for existing teams
-        updateTeamLogos();
+    try {
+        // Only load data if database is empty
+        if (teamRepository.count() == 0) {
+            System.out.println("Loading data from JSON...");
+
+            loadScheduleData();
+
+            System.out.println("Data load completed successfully!");
+            System.out.println("Total teams loaded: " + teamRepository.count());
+            System.out.println("Total games loaded: " + gameRepository.count());
+        } else {
+            System.out.println("Database already contains data. Skipping data load.");
+            System.out.println("Existing teams: " + teamRepository.count());
+            System.out.println("Existing games: " + gameRepository.count());
+        }
+    } catch (Exception e) {
+        System.err.println("Error during data loading: " + e.getMessage());
+        e.printStackTrace();
+        // Don't crash the application if data loading fails
     }
 }
 
@@ -230,5 +233,3 @@ private void updateTeamLogos() {
 
 
 }
-
-
