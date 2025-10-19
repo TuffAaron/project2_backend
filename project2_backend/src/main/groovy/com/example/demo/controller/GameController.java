@@ -27,7 +27,7 @@ public class GameController {
     public Map<String, Object> testEndpoint(@AuthenticationPrincipal OAuth2User principal) {
         Map<String, Object> response = new HashMap<>();
         response.put("status", "success");
-        response.put("message", "🏀 Games API is working! User is authenticated.");
+        response.put("message", "Games API is working! User is authenticated.");
         response.put("timestamp", System.currentTimeMillis());
         
         if (principal != null) {
@@ -39,7 +39,6 @@ public class GameController {
         return response;
     }
 
-    @GetMapping
     @GetMapping("/all")
     public Map<String, Object> getAllGames(@AuthenticationPrincipal OAuth2User principal) {
         Map<String, Object> response = new HashMap<>();
@@ -83,11 +82,10 @@ public class GameController {
     }
 
     @GetMapping("/{gameId}")
-    public Map<String, Object> getGameById(@PathVariable Long gameId, @AuthenticationPrincipal OAuth2User principal) {
+    public Map<String, Object> getGameById(@PathVariable String gameId, @AuthenticationPrincipal OAuth2User principal) {
         Map<String, Object> response = new HashMap<>();
         
         try {
-            // Note: You'll need to add this method to your GameService
             Game game = gameService.getGameById(gameId);
             if (game != null) {
                 response.put("status", "success");
