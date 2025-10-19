@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -116,7 +117,7 @@ public void run(String... args) throws Exception {
             team.setLosses(getIntValue(teamNode, "losses"));
             team.setScore(getIntValue(teamNode, "score"));
             team.setSeed(getIntValue(teamNode, "seed"));
-            
+            team.setLogo(getTeamLogo(teamId));
             teamsMap.put(teamId, team);
         }
     }
@@ -197,16 +198,38 @@ public void run(String... args) throws Exception {
     }
 
     private ZonedDateTime parseZonedDateTime(JsonNode node, String fieldName) {
-        String dateTimeStr = getStringValue(node, fieldName);
-        if (dateTimeStr == null || dateTimeStr.isEmpty()) {
-            return null;
-        }
-        
-        try {
-            return ZonedDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_DATE_TIME);
-        } catch (Exception e) {
-            System.err.println("Failed to parse datetime: " + dateTimeStr + " for field: " + fieldName);
-            return null;
+    String dateTimeStr = getStringValue(node, fieldName);
+    if (dateTimeStr == null || dateTimeStr.isEmpty()) {
+        return null;
+    }
+    
+    try {
+        return ZonedDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_DATE_TIME);
+    } catch (Exception e) {
+        System.err.println("Failed to parse datetime: " + dateTimeStr + " for field: " + fieldName);
+        return null;
+    }
+}
+
+private String getTeamLogo(Long teamId) {
+   //NBA's CDN (Content Delivery Network) URL
+    return "https://cdn.nba.com/logos/nba/" + teamId + "/primary/L/logo.svg";
+}
+
+//had to add this to update our database, I didn't want to clear it and load all the data
+private void updateTeamLogos() {
+    System.out.println("Updating team logos...");
+    
+    List<Team> teams = teamRepository.findAll();
+    
+    for (Team team : teams) {
+        if (team.getLogo() == null || team.getLogo().isEmpty()) {
+            team.setLogo(getTeamLogo(team.getTeamId()));
         }
     }
+    teamRepository.saveAll(teams);
+    System.out.println("Updated logos for " + teams.size() + " teams");
+}
+
+
 }
