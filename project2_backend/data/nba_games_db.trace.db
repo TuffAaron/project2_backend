@@ -1,0 +1,6 @@
+2025-10-14 12:50:50.684688-07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * FROM GAMES  BY [*]HOME_TEAM_ID"; SQL statement:
+SELECT * FROM GAMES  BY HOME_TEAM_ID [42000-232]
+2025-10-14 12:55:33.624847-07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * FROM GAMES WHERE HOME_TEAM_ID =[*]= '1610612744' OR AWAY_TEAM_ID == '1610612744'"; expected "ALL (, ANY (, SOME ("; SQL statement:
+SELECT * FROM GAMES WHERE HOME_TEAM_ID == '1610612744' OR AWAY_TEAM_ID == '1610612744' [42001-232]
