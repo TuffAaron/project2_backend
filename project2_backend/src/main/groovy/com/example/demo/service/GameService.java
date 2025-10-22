@@ -20,4 +20,8 @@ public class GameService {
     public List<Game> getAllGames() {
         return gameRepository.findAll();
     }
+    
+    public Game getGameById(String gameId) {
+        return gameRepository.findById(gameId).orElse(null);
+    }
 }
