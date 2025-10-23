@@ -33,7 +33,7 @@ class SecurityConfig {
                     .requestMatchers("/api/public/**").permitAll()
                     .requestMatchers("/login", "/oauth2/**").permitAll()
                     // Protected endpoints
-                    .requestMatchers("/api/games/**", "/api/teams/**").authenticated()
+                    .requestMatchers("/api/games/**", "/api/teams/**").permitAll()
                     .requestMatchers("/dashboard/**", "/profile/**").authenticated()
                     .requestMatchers("/api/user").authenticated()
                     // All other requests require authentication
@@ -73,6 +73,7 @@ class SecurityConfig {
             "https://*.herokuapp.com",
             "https://*.railway.app",
             "https://*.render.com",
+            "https://jumpball-frontend.herokuapp.com",
             baseUrl
         ))
         
