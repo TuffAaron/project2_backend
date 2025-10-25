@@ -1,5 +1,7 @@
 package com.example.demo.controller
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Controller
@@ -11,9 +13,17 @@ import org.springframework.web.bind.annotation.RestController
 @Controller
 class AuthController {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class)
+
     @GetMapping("/")
     String home() {
         return "home"
+    }
+
+    @GetMapping("/test")
+    @ResponseBody
+    String test() {
+        return "App is running! Troubleshoot branch deployed."
     }
 
     @GetMapping("/login")
@@ -23,12 +33,26 @@ class AuthController {
 
     @GetMapping("/dashboard")
     String dashboard(Model model, @AuthenticationPrincipal OAuth2User principal) {
-        if (principal != null) {
-            model.addAttribute("name", principal.getAttribute("name") ?: principal.getAttribute("login") ?: "User")
-            model.addAttribute("email", principal.getAttribute("email") ?: "No email provided")
-            model.addAttribute("avatar", principal.getAttribute("avatar_url") ?: principal.getAttribute("picture"))
-            model.addAttribute("provider", getProvider(principal))
+        log.info("✅ Dashboard endpoint accessed")
+        
+        if (principal == null) {
+            log.warn("No principal found, redirecting to login")
+            return "redirect:/login"
         }
+        
+        // Extract user info safely
+        String name = principal.getAttribute("name") ?: principal.getAttribute("login") ?: "User"
+        String email = principal.getAttribute("email") ?: "No email"
+        String avatar = principal.getAttribute("avatar_url") ?: principal.getAttribute("picture") ?: ""
+        String provider = getProvider(principal)
+        
+        log.info("User logged in: {} via {}", name, provider)
+        
+        model.addAttribute("name", name)
+        model.addAttribute("email", email)
+        model.addAttribute("avatar", avatar)
+        model.addAttribute("provider", provider)
+        
         return "dashboard"
     }
 

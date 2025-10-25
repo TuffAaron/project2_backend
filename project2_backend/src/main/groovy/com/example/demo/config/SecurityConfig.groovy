@@ -1,10 +1,16 @@
 package com.example.demo.config
 
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.core.Authentication
+import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
@@ -16,6 +22,8 @@ import java.util.Arrays
 @Configuration
 @EnableWebSecurity
 class SecurityConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class)
 
     @Value('${APP_BASE_URL:http://localhost:8080}')
     private String baseUrl
@@ -29,12 +37,12 @@ class SecurityConfig {
             .authorizeHttpRequests { authz ->
                 authz
                     // Public endpoints
-                    .requestMatchers("/", "/home", "/public/**", "/error", "/h2-console/**").permitAll()
+                    .requestMatchers("/", "/home", "/public/**", "/error", "/h2-console/**", "/test").permitAll()
                     .requestMatchers("/api/public/**").permitAll()
-                    .requestMatchers("/login", "/oauth2/**").permitAll()
-                    // Protected endpoints
+                    .requestMatchers("/login", "/login/**", "/oauth2/**", "/login/oauth2/**").permitAll()
+                    // Protected endpoints - only /dashboard not /dashboard/**
+                    .requestMatchers("/dashboard", "/profile").authenticated()
                     .requestMatchers("/api/games/**", "/api/teams/**").authenticated()
-                    .requestMatchers("/dashboard/**", "/profile/**").authenticated()
                     .requestMatchers("/api/user").authenticated()
                     // All other requests require authentication
                     .anyRequest().authenticated()
@@ -42,18 +50,20 @@ class SecurityConfig {
             .oauth2Login { oauth2 ->
                 oauth2
                     .loginPage("/login")
-                    .successHandler(authenticationSuccessHandler())
+                    .defaultSuccessUrl("/dashboard", true)
                     .failureUrl("/login?error=true")
             }
             .logout { logout ->
                 logout
                     .logoutUrl("/logout")
-                    .logoutSuccessUrl("/")
+                    .logoutSuccessUrl("/?logout=success")
                     .invalidateHttpSession(true)
-                    .deleteCookies("JSESSIONID")
+                    .clearAuthentication(true)
+                    .deleteCookies("JSESSIONID", "remember-me")
+                    .permitAll()
             }
             .csrf { csrf ->
-                csrf.disable() // Disable for API endpoints and H2 console
+                csrf.disable() // Temporarily disable to troubleshoot OAuth
             }
             .headers { headers ->
                 headers.frameOptions().disable() // Allow H2 console iframe
@@ -92,9 +102,32 @@ class SecurityConfig {
 
     @Bean
     AuthenticationSuccessHandler authenticationSuccessHandler() {
-        SimpleUrlAuthenticationSuccessHandler handler = new SimpleUrlAuthenticationSuccessHandler()
-        handler.setDefaultTargetUrl("/dashboard")
-        handler.setAlwaysUseDefaultTargetUrl(true)
-        return handler
+        return new AuthenticationSuccessHandler() {
+            @Override
+            void onAuthenticationSuccess(HttpServletRequest request, 
+                                        HttpServletResponse response, 
+                                        Authentication authentication) throws IOException {
+                try {
+                    // Log successful authentication
+                    OAuth2User user = (OAuth2User) authentication.getPrincipal()
+                    String name = user.getAttribute("name") ?: user.getAttribute("login") ?: "Unknown"
+                    String email = user.getAttribute("email") ?: "No email"
+                    
+                    log.info("✅ OAuth2 login successful - User: {}, Email: {}", name, email)
+                    log.debug("User attributes: {}", user.getAttributes())
+                    
+                    // Simple redirect without any session manipulation
+                    String redirectUrl = "/dashboard"
+                    log.info("Redirecting to: {}", redirectUrl)
+                    
+                    response.sendRedirect(redirectUrl)
+                    
+                } catch (Exception e) {
+                    log.error("❌ Error in authentication success handler: {}", e.getMessage(), e)
+                    // Redirect to home with error parameter
+                    response.sendRedirect("/?error=auth_handler")
+                }
+            }
+        }
     }
 }
