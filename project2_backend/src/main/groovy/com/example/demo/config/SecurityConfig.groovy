@@ -1,13 +1,10 @@
 package com.example.demo.config
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient
-import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
@@ -24,8 +21,7 @@ class SecurityConfig {
     private String baseUrl
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, 
-                                   @Autowired(required = false) OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> tokenResponseClient) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .cors { cors ->
                 cors.configurationSource(corsConfigurationSource())
@@ -48,11 +44,6 @@ class SecurityConfig {
                     .loginPage("/login")
                     .successHandler(authenticationSuccessHandler())
                     .failureUrl("/login?error=true")
-                if (tokenResponseClient != null) {
-                    oauth2.tokenEndpoint { token ->
-                        token.accessTokenResponseClient(tokenResponseClient)
-                    }
-                }
             }
             .logout { logout ->
                 logout
