@@ -1,10 +1,13 @@
 package com.example.demo.config
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient
+import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
@@ -19,6 +22,9 @@ class SecurityConfig {
 
     @Value('${APP_BASE_URL:http://localhost:8080}')
     private String baseUrl
+
+    @Autowired(required = false)
+    private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -44,6 +50,11 @@ class SecurityConfig {
                     .loginPage("/login")
                     .successHandler(authenticationSuccessHandler())
                     .failureUrl("/login?error=true")
+                    .tokenEndpoint { token ->
+                        if (accessTokenResponseClient != null) {
+                            token.accessTokenResponseClient(accessTokenResponseClient)
+                        }
+                    }
             }
             .logout { logout ->
                 logout
