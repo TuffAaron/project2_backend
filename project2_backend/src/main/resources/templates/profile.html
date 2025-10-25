@@ -77,17 +77,17 @@
 </head>
 <body>
     <div class="container">
-        <h1>👤 User Profile</h1>
+        <h1>User Profile</h1>
         
         <div class="profile-section">
-            <h2>📋 Profile Summary</h2>
+            <h2>Profile Summary</h2>
             <p><strong>Provider:</strong> <span th:text="${provider}">OAuth Provider</span></p>
-            <p><strong>Authenticated:</strong> ✅ Yes</p>
+            <p><strong>Authenticated:</strong> Yes</p>
             <p><strong>Profile Last Updated:</strong> <span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm:ss')}">Now</span></p>
         </div>
 
         <div class="profile-section">
-            <h2>🔍 User Attributes</h2>
+            <h2>User Attributes</h2>
             <p>Here are all the attributes provided by your OAuth2 provider:</p>
             
             <table class="attribute-table">
@@ -107,7 +107,7 @@
         </div>
 
         <div class="profile-section">
-            <h2>📄 Raw JSON Data</h2>
+            <h2>Raw JSON Data</h2>
             <p>Complete OAuth2 user attributes in JSON format:</p>
             <div class="json-viewer" th:text="${#objects.toString(user)}">
                 JSON data will appear here
@@ -115,7 +115,7 @@
         </div>
 
         <div class="profile-section">
-            <h2>🔧 Developer Information</h2>
+            <h2>Developer Information</h2>
             <ul>
                 <li><strong>OAuth2 Flow:</strong> Authorization Code Grant</li>
                 <li><strong>Scopes Requested:</strong> Varies by provider (profile, email, etc.)</li>
@@ -125,9 +125,9 @@
         </div>
 
         <div style="text-align: center; margin-top: 30px;">
-            <a href="/dashboard" class="btn">📊 Dashboard</a>
-            <a href="/api/user" class="btn" target="_blank">🔗 JSON API</a>
-            <a href="/" class="btn">🏠 Home</a>
+            <a href="/dashboard" class="btn">Dashboard</a>
+            <a href="/api/user" class="btn" target="_blank">JSON API</a>
+            <a href="/" class="btn">Home</a>
         </div>
     </div>
 </body>
