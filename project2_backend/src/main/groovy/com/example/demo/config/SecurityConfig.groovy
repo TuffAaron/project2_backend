@@ -23,11 +23,9 @@ class SecurityConfig {
     @Value('${APP_BASE_URL:http://localhost:8080}')
     private String baseUrl
 
-    @Autowired(required = false)
-    private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient
-
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, 
+                                   @Autowired(required = false) OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> tokenResponseClient) throws Exception {
         http
             .cors { cors ->
                 cors.configurationSource(corsConfigurationSource())
@@ -50,11 +48,11 @@ class SecurityConfig {
                     .loginPage("/login")
                     .successHandler(authenticationSuccessHandler())
                     .failureUrl("/login?error=true")
-                    .tokenEndpoint { token ->
-                        if (accessTokenResponseClient != null) {
-                            token.accessTokenResponseClient(accessTokenResponseClient)
-                        }
+                if (tokenResponseClient != null) {
+                    oauth2.tokenEndpoint { token ->
+                        token.accessTokenResponseClient(tokenResponseClient)
                     }
+                }
             }
             .logout { logout ->
                 logout
