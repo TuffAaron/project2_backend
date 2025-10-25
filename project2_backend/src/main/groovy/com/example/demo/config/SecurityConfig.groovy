@@ -51,7 +51,11 @@ class SecurityConfig {
                 oauth2
                     .loginPage("/login")
                     .defaultSuccessUrl("/dashboard", true)
-                    .failureUrl("/login?error=true")
+                    .failureHandler { request, response, exception ->
+                        def logger = LoggerFactory.getLogger(SecurityConfig.class)
+                        logger.error("❌ OAuth2 login failed: {}", exception.getMessage(), exception)
+                        response.sendRedirect("/login?error=true")
+                    }
             }
             .logout { logout ->
                 logout
