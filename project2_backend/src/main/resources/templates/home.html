@@ -59,28 +59,28 @@
 </head>
 <body>
     <div class="container">
-        <h1>🚀 Project2 Backend OAuth2 Demo</h1>
+        <h1>Project2 Backend OAuth2 Demo</h1>
         
-        <p>Welcome to your Spring Boot OAuth2 application! This demo showcases OAuth2 integration with multiple providers.</p>
+        <p>Welcome to your Spring Boot OAuth2 application! This demo showcases OAuth2 integration with GitHub and Google.</p>
         
-        <h2>✨ Features Available:</h2>
+        <h2>Features Available:</h2>
         <ul class="feature-list">
-            <li>🔐 OAuth2 Authentication with GitHub, Google, Microsoft, and Discord</li>
-            <li>🛡️ Spring Security Integration</li>
-            <li>👤 User Profile Management</li>
-            <li>🎮 NBA Games & Teams API (Protected Routes)</li>
-            <li>📊 H2 Database Console Access</li>
-            <li>🔧 RESTful API Endpoints</li>
+            <li>OAuth2 Authentication with GitHub and Google</li>
+            <li>Spring Security Integration</li>
+            <li>User Profile Management</li>
+            <li>NBA Games & Teams API (Protected Routes)</li>
+            <li>H2 Database Console Access</li>
+            <li>RESTful API Endpoints</li>
         </ul>
 
-        <h2>🌟 Quick Actions:</h2>
+        <h2>Quick Actions:</h2>
         <div class="text-center">
-            <a href="/login" class="btn">🔑 Login with OAuth2</a>
-            <a href="/api/public/status" class="btn btn-success">📡 Test Public API</a>
-            <a href="/h2-console" class="btn" target="_blank">🗄️ Database Console</a>
+            <a href="/login" class="btn">Login with OAuth2</a>
+            <a href="/api/public/status" class="btn btn-success">Test Public API</a>
+            <a href="/h2-console" class="btn" target="_blank">Database Console</a>
         </div>
 
-        <h2>📚 API Endpoints:</h2>
+        <h2>API Endpoints:</h2>
         <ul>
             <li><strong>Public:</strong> <code>/api/public/status</code> - No authentication required</li>
             <li><strong>Protected:</strong> <code>/api/user</code> - Requires authentication</li>
@@ -88,13 +88,11 @@
             <li><strong>Teams API:</strong> <code>/api/teams/**</code> - Requires authentication</li>
         </ul>
 
-        <h2>🔧 Environment Setup:</h2>
+        <h2>Environment Setup:</h2>
         <p>To configure OAuth2 providers, update your <code>.env.local</code> file with your client credentials:</p>
         <ul>
             <li>GitHub: <a href="https://github.com/settings/developers" target="_blank">GitHub Developer Settings</a></li>
             <li>Google: <a href="https://console.developers.google.com/" target="_blank">Google Cloud Console</a></li>
-            <li>Microsoft: <a href="https://portal.azure.com/" target="_blank">Azure Portal</a></li>
-            <li>Discord: <a href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</a></li>
         </ul>
     </div>
 </body>

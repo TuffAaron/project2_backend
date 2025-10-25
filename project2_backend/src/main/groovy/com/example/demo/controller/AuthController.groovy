@@ -45,7 +45,6 @@ class AuthController {
         // Determine provider based on attributes
         if (principal.getAttribute("login") != null) return "GitHub"
         if (principal.getAttribute("picture") != null) return "Google"
-        if (principal.getAttribute("id") != null && principal.getAttribute("username") != null) return "Discord"
         return "Unknown"
     }
 }
@@ -81,7 +80,6 @@ class AuthRestController {
     private String getProvider(OAuth2User principal) {
         if (principal.getAttribute("login") != null) return "GitHub"
         if (principal.getAttribute("picture") != null) return "Google"
-        if (principal.getAttribute("id") != null && principal.getAttribute("username") != null) return "Discord"
         return "Unknown"
     }
 }

@@ -77,7 +77,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎯 Dashboard</h1>
+        <h1>Dashboard</h1>
         
         <div class="user-info">
             <img th:if="${avatar}" th:src="${avatar}" alt="Avatar" class="avatar">
@@ -88,14 +88,14 @@
             </div>
         </div>
 
-        <h2>🚀 Quick Actions</h2>
-        <a href="/profile" class="btn">👤 View Full Profile</a>
-        <a href="/api/user" class="btn btn-success" target="_blank">📡 API: User Info</a>
-        <a href="/api/games" class="btn btn-success" target="_blank">🏀 API: Games</a>
-        <a href="/api/teams" class="btn btn-success" target="_blank">🏆 API: Teams</a>
+        <h2>Quick Actions</h2>
+        <a href="/profile" class="btn">View Full Profile</a>
+        <a href="/api/user" class="btn btn-success" target="_blank">API: User Info</a>
+        <a href="/api/games" class="btn btn-success" target="_blank">API: Games</a>
+        <a href="/api/teams" class="btn btn-success" target="_blank">API: Teams</a>
         
         <div class="api-section">
-            <h2>🔗 Available API Endpoints</h2>
+            <h2>Available API Endpoints</h2>
             <p>Now that you're authenticated, you can access these protected endpoints:</p>
             <ul>
                 <li><code>GET /api/user</code> - Your user information</li>
@@ -108,16 +108,16 @@
             <p><strong>Test these endpoints:</strong> Click the API buttons above or use tools like Postman/curl with your session cookies.</p>
         </div>
 
-        <h2>⚙️ System Information</h2>
+        <h2>System Information</h2>
         <div class="api-section">
-            <p><strong>Authentication Status:</strong> ✅ Authenticated</p>
-            <p><strong>Session Active:</strong> ✅ Yes</p>
+            <p><strong>Authentication Status:</strong> Authenticated</p>
+            <p><strong>Session Active:</strong> Yes</p>
             <p><strong>Database:</strong> H2 Console available at <a href="/h2-console" target="_blank">/h2-console</a></p>
         </div>
 
         <div style="text-align: center; margin-top: 30px;">
-            <a href="/" class="btn">🏠 Home</a>
-            <a href="/logout" class="btn btn-danger">🚪 Logout</a>
+            <a href="/" class="btn">Home</a>
+            <a href="/logout" class="btn btn-danger">Logout</a>
         </div>
     </div>
 </body>
