@@ -25,7 +25,7 @@ class SecurityConfig {
 
     private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class)
 
-    @Value('${APP_BASE_URL:http://localhost:8080}')
+    @Value('${app.base-url:http://localhost:8080}')
     private String baseUrl
 
     @Bean
