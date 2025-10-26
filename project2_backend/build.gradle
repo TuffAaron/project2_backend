@@ -2,6 +2,7 @@ plugins {
 	id 'groovy'
 	id 'org.springframework.boot' version '3.5.6'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.adarshr.test-logger' version '3.2.0'
 }
 
 group = 'com.example'
@@ -29,23 +30,32 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	}
+
+testlogger {
+	theme 'mocha'
+	showExceptions true
+	showStackTraces true
+	showFullStackTraces false
+	showCauses true
+	slowThreshold 2000
+	showSummary true
+	showSimpleNames false
+	showPassed true
+	showSkipped true
+	showFailed true
+	showOnlySlow false
+	showStandardStreams false
+	showPassedStandardStreams true
+	showSkippedStandardStreams true
+	showFailedStandardStreams true
+	logLevel 'lifecycle'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 	// Configure test to use the test profile
 	systemProperty 'spring.profiles.active', 'test'
-	// Make tests more resilient for CI/CD environments
-	testLogging {
-		events "passed", "skipped", "failed"
-		exceptionFormat "full"
-	}
-		// Skip tests if explicitly requested or in Heroku environment
-		onlyIf {
-			// Set APP_NAME to your Heroku app name in the environment for deployment
-			!project.hasProperty('skipTests') &&
-			!System.getenv('APP_NAME') // Heroku app URL: https://jump-ball-df460ee69b61.herokuapp.com/
-		}
 }
 
 // Heroku deployment task that prioritizes building the JAR
@@ -59,5 +69,13 @@ task stage(dependsOn: 'bootJar') {
 if (System.getenv('HEROKU_APP_NAME')) {
 	test {
 		ignoreFailures = true
+	}
+}
+
+// Clean and test tasks
+task cleanTest {
+	dependsOn clean, test
+	doLast {
+		println "Clean and test tasks completed successfully"
 	}
 }
