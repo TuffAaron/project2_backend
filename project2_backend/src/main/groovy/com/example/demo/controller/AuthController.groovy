@@ -23,7 +23,7 @@ class AuthController {
     @GetMapping("/test")
     @ResponseBody
     String test() {
-        return "App is running! Test/complete-coverage branch deployed."
+        return "App is running! Troubleshoot branch deployed."
     }
 
     @GetMapping("/login")
@@ -34,25 +34,25 @@ class AuthController {
     @GetMapping("/dashboard")
     String dashboard(Model model, @AuthenticationPrincipal OAuth2User principal) {
         log.info("✅ Dashboard endpoint accessed")
-
+        
         if (principal == null) {
             log.warn("No principal found, redirecting to login")
             return "redirect:/login"
         }
-
+        
         // Extract user info safely
         String name = principal.getAttribute("name") ?: principal.getAttribute("login") ?: "User"
         String email = principal.getAttribute("email") ?: "No email"
         String avatar = principal.getAttribute("avatar_url") ?: principal.getAttribute("picture") ?: ""
         String provider = getProvider(principal)
-
+        
         log.info("User logged in: {} via {}", name, provider)
-
+        
         model.addAttribute("name", name)
         model.addAttribute("email", email)
         model.addAttribute("avatar", avatar)
         model.addAttribute("provider", provider)
-
+        
         return "dashboard"
     }
 
@@ -81,7 +81,7 @@ class AuthRestController {
         if (principal == null) {
             return [error: "Not authenticated"]
         }
-
+        
         return [
             name: principal.getAttribute("name") ?: principal.getAttribute("login") ?: "User",
             email: principal.getAttribute("email") ?: "No email provided",

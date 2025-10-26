@@ -1,0 +1,9 @@
+# Ignore test resources during deployment
+src/test/
+build/test-results/
+build/reports/
+*.md
+!README.md
+.env.example
+.gitignore
+.idea/
