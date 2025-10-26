@@ -46,14 +46,6 @@
             background: #db4437;
             color: white;
         }
-        .microsoft-btn {
-            background: #00a1f1;
-            color: white;
-        }
-        .discord-btn {
-            background: #5865f2;
-            color: white;
-        }
         .error-message {
             background: #f8d7da;
             color: #721c24;
@@ -68,40 +60,24 @@
             color: #007bff;
             text-decoration: none;
         }
-        .provider-icon {
-            margin-right: 10px;
-            font-size: 18px;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔐 Login with OAuth2</h1>
+        <h1>Login with OAuth2</h1>
         
         <div th:if="${param.error}" class="error-message">
-            ❌ Authentication failed. Please try again.
+            Authentication failed. Please try again.
         </div>
         
         <p>Choose your preferred authentication provider:</p>
         
         <a href="/oauth2/authorization/github" class="oauth-btn github-btn">
-            <span class="provider-icon">🐙</span>
             Continue with GitHub
         </a>
         
         <a href="/oauth2/authorization/google" class="oauth-btn google-btn">
-            <span class="provider-icon">🔍</span>
             Continue with Google
-        </a>
-        
-        <a href="/oauth2/authorization/microsoft" class="oauth-btn microsoft-btn">
-            <span class="provider-icon">🏢</span>
-            Continue with Microsoft
-        </a>
-        
-        <a href="/oauth2/authorization/discord" class="oauth-btn discord-btn">
-            <span class="provider-icon">🎮</span>
-            Continue with Discord
         </a>
         
         <div class="back-link">
