@@ -36,17 +36,10 @@ class SecurityConfig {
             }
             .authorizeHttpRequests { authz ->
                 authz
-                    // Public endpoints
-                    .requestMatchers("/", "/home", "/public/**", "/error", "/h2-console/**", "/test").permitAll()
-                    .requestMatchers("/api/public/**").permitAll()
-                    .requestMatchers("/login", "/login/**", "/oauth2/**", "/login/oauth2/**").permitAll()
-                    // Protected endpoints - only /dashboard not /dashboard/**
-                    .requestMatchers("/dashboard", "/profile").authenticated()
-                    .requestMatchers("/api/games/**", "/api/teams/**").authenticated()
-                    .requestMatchers("/api/user").authenticated()
-                    // All other requests require authentication
-                    .anyRequest().authenticated()
+                    // Public endpoints - allow all for local development
+                    .requestMatchers("/**").permitAll()
             }
+            /* OAuth2 Login - Disabled for local development, enabled in production
             .oauth2Login { oauth2 ->
                 oauth2
                     .loginPage("/login")
@@ -57,6 +50,7 @@ class SecurityConfig {
                         response.sendRedirect("/login?error=true")
                     }
             }
+            */
             .logout { logout ->
                 logout
                     .logoutUrl("/logout")
