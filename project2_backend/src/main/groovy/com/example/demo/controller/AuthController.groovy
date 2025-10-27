@@ -1,7 +1,9 @@
 package com.example.demo.controller
 
+import com.example.demo.security.JwtTokenProvider
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Controller
@@ -76,6 +78,9 @@ class AuthController {
 @RestController
 class AuthRestController {
 
+    @Autowired
+    private JwtTokenProvider tokenProvider
+
     @GetMapping("/api/user")
     Map<String, Object> user(@AuthenticationPrincipal OAuth2User principal) {
         if (principal == null) {
@@ -89,6 +94,32 @@ class AuthRestController {
             provider: getProvider(principal),
             authenticated: true,
             attributes: principal.getAttributes()
+        ]
+    }
+
+    // returns jwt token for mobile endpoint
+    @GetMapping("/api/auth/token")
+    Map<String, Object> getToken(@AuthenticationPrincipal OAuth2User principal) {
+        if (principal == null) {
+            return [
+                error: "Not authenticated",
+                message: "You must be logged in to get a token"
+            ]
+        }
+        
+        // Get username from OAuth2User
+        String username = principal.getAttribute("email") ?: 
+                         principal.getAttribute("login") ?: 
+                         principal.getAttribute("name") ?: 
+                         "User"
+        
+        // Generate JWT token
+        String token = tokenProvider.generateToken(username)
+        
+        return [
+            token: token,
+            username: username,
+            expiresIn: 86400000 
         ]
     }
 
