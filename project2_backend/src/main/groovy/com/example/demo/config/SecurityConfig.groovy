@@ -28,7 +28,7 @@ class SecurityConfig {
     @Value('${APP_BASE_URL:http://localhost:8080}')
     private String baseUrl
 
-    @Value('${FRONTEND_URL:http://localhost:3000}')
+    @Value('${frontend.url:http://localhost:3000}')
     private String frontendUrl
 
     @Bean
