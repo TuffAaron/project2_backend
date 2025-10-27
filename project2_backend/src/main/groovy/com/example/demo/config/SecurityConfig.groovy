@@ -28,6 +28,9 @@ class SecurityConfig {
     @Value('${APP_BASE_URL:http://localhost:8080}')
     private String baseUrl
 
+    @Value('${FRONTEND_URL:http://localhost:3000}')
+    private String frontendUrl
+
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -50,7 +53,7 @@ class SecurityConfig {
             .oauth2Login { oauth2 ->
                 oauth2
                     .loginPage("/login")
-                    .defaultSuccessUrl("/dashboard", true)
+                    .successHandler(oauthSuccessHandler())
                     .failureHandler { request, response, exception ->
                         def logger = LoggerFactory.getLogger(SecurityConfig.class)
                         logger.error("❌ OAuth2 login failed: {}", exception.getMessage(), exception)
@@ -74,6 +77,33 @@ class SecurityConfig {
             }
 
         return http.build()
+    }
+
+    @Bean
+    AuthenticationSuccessHandler oauthSuccessHandler() {
+        return new SimpleUrlAuthenticationSuccessHandler() {
+            @Override
+            protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+                OAuth2User principal = (OAuth2User) authentication.getPrincipal()
+                
+                // Extract user info
+                String name = principal.getAttribute("name") ?: principal.getAttribute("login") ?: "User"
+                String email = principal.getAttribute("email") ?: ""
+                String avatar = principal.getAttribute("avatar_url") ?: principal.getAttribute("picture") ?: ""
+                
+                log.info("✅ OAuth login successful for user: {}", name)
+                log.info("🔄 Redirecting to frontend: {}", frontendUrl)
+                
+                // Build redirect URL with user info as query parameters
+                String redirectUrl = frontendUrl + 
+                    "?name=" + URLEncoder.encode(name, "UTF-8") +
+                    "&email=" + URLEncoder.encode(email, "UTF-8") +
+                    "&avatar=" + URLEncoder.encode(avatar, "UTF-8") +
+                    "&authenticated=true"
+                
+                return redirectUrl
+            }
+        }
     }
 
     @Bean
@@ -102,36 +132,5 @@ class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
         return source
-    }
-
-    @Bean
-    AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return new AuthenticationSuccessHandler() {
-            @Override
-            void onAuthenticationSuccess(HttpServletRequest request, 
-                                        HttpServletResponse response, 
-                                        Authentication authentication) throws IOException {
-                try {
-                    // Log successful authentication
-                    OAuth2User user = (OAuth2User) authentication.getPrincipal()
-                    String name = user.getAttribute("name") ?: user.getAttribute("login") ?: "Unknown"
-                    String email = user.getAttribute("email") ?: "No email"
-                    
-                    log.info("✅ OAuth2 login successful - User: {}, Email: {}", name, email)
-                    log.debug("User attributes: {}", user.getAttributes())
-                    
-                    // Simple redirect without any session manipulation
-                    String redirectUrl = "/dashboard"
-                    log.info("Redirecting to: {}", redirectUrl)
-                    
-                    response.sendRedirect(redirectUrl)
-                    
-                } catch (Exception e) {
-                    log.error("❌ Error in authentication success handler: {}", e.getMessage(), e)
-                    // Redirect to home with error parameter
-                    response.sendRedirect("/?error=auth_handler")
-                }
-            }
-        }
     }
 }
