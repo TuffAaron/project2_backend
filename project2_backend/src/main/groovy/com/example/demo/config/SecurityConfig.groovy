@@ -17,6 +17,8 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.util.Arrays
 
 @Configuration
@@ -84,24 +86,31 @@ class SecurityConfig {
         return new SimpleUrlAuthenticationSuccessHandler() {
             @Override
             protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-                OAuth2User principal = (OAuth2User) authentication.getPrincipal()
-                
-                // Extract user info
-                String name = principal.getAttribute("name") ?: principal.getAttribute("login") ?: "User"
-                String email = principal.getAttribute("email") ?: ""
-                String avatar = principal.getAttribute("avatar_url") ?: principal.getAttribute("picture") ?: ""
-                
-                log.info("✅ OAuth login successful for user: {}", name)
-                log.info("🔄 Redirecting to frontend: {}", frontendUrl)
-                
-                // Build redirect URL with user info as query parameters
-                String redirectUrl = frontendUrl + 
-                    "?name=" + URLEncoder.encode(name, "UTF-8") +
-                    "&email=" + URLEncoder.encode(email, "UTF-8") +
-                    "&avatar=" + URLEncoder.encode(avatar, "UTF-8") +
-                    "&authenticated=true"
-                
-                return redirectUrl
+                try {
+                    OAuth2User principal = (OAuth2User) authentication.getPrincipal()
+                    
+                    // Extract user info
+                    String name = principal.getAttribute("name") ?: principal.getAttribute("login") ?: "User"
+                    String email = principal.getAttribute("email") ?: ""
+                    String avatar = principal.getAttribute("avatar_url") ?: principal.getAttribute("picture") ?: ""
+                    
+                    log.info("✅ OAuth login successful for user: {}", name)
+                    log.info("🔄 Redirecting to frontend: {}", frontendUrl)
+                    
+                    // Build redirect URL with user info as query parameters
+                    String redirectUrl = frontendUrl + 
+                        "?name=" + URLEncoder.encode(name, StandardCharsets.UTF_8.toString()) +
+                        "&email=" + URLEncoder.encode(email, StandardCharsets.UTF_8.toString()) +
+                        "&avatar=" + URLEncoder.encode(avatar, StandardCharsets.UTF_8.toString()) +
+                        "&authenticated=true"
+                    
+                    log.info("Redirect URL: {}", redirectUrl)
+                    return redirectUrl
+                } catch (Exception e) {
+                    log.error("❌ Error in OAuth success handler: {}", e.getMessage(), e)
+                    // Fallback to dashboard if there's an error
+                    return "/dashboard"
+                }
             }
         }
     }
