@@ -1,79 +1,138 @@
 # OAuth Frontend Redirect Configuration
 
 ## Overview
-Your OAuth flow has been updated to redirect users to your frontend app after successful login, instead of the backend `/dashboard` endpoint.
+Your OAuth flow has been updated to redirect users to your **Expo React Native app** after successful login, instead of the backend `/dashboard` endpoint.
 
 ## Changes Made
 
 ### 1. SecurityConfig.groovy
-- Added a new `oauthSuccessHandler()` method that redirects to your frontend app
+- Added a new `oauthSuccessHandler()` method that redirects to your Expo app
 - Removed the hardcoded `/dashboard` redirect
 - User information (name, email, avatar) is now passed as URL query parameters
 
 ### 2. application.properties
-- Added `FRONTEND_URL` configuration property
-- Default value: `http://localhost:3000` (typical React/Next.js dev server)
+- Added `frontend.url` configuration property
+- Default value: `exp://localhost:8081` (Expo React Native dev server)
 
 ## Configuration
 
 ### Local Development
-No changes needed - the default `FRONTEND_URL=http://localhost:3000` should work.
+No changes needed - the default `frontend.url=exp://localhost:8081` works with Expo.
 
 ### Production (Heroku/Railway/etc.)
-Set the `FRONTEND_URL` environment variable to your deployed frontend app URL:
+Set the `FRONTEND_URL` environment variable to your app's deep link or web URL:
 
 ```bash
-# Heroku example
-heroku config:set FRONTEND_URL=https://your-app.vercel.app
+# For Expo deep linking
+heroku config:set FRONTEND_URL=myapp://auth/callback
+
+# For web-based Expo app
+heroku config:set FRONTEND_URL=https://your-expo-app.com/auth
 
 # Or via Heroku dashboard: Settings → Config Vars
 # Key: FRONTEND_URL
-# Value: https://your-app.vercel.app
+# Value: myapp://auth/callback
 ```
 
 ## How It Works
 
-1. User clicks "Login with GitHub/Google" 
+1. User clicks "Login with GitHub/Google" in your Expo app
 2. OAuth flow completes successfully
-3. User is redirected to: `${FRONTEND_URL}?name=...&email=...&avatar=...&authenticated=true`
+3. User is redirected to: `exp://localhost:8081?name=...&email=...&avatar=...&authenticated=true`
 
 ### Example Redirect URL
 ```
-http://localhost:3000?name=John%20Doe&email=john@example.com&avatar=https://...&authenticated=true
+exp://localhost:8081?name=John%20Doe&email=john@example.com&avatar=https://...&authenticated=true
 ```
 
-## Frontend Integration
+## Expo React Native Integration
 
-### React/Next.js Example
+### Setting Up Deep Linking in Expo
+
+First, configure your app to handle deep links. In your `app.json` or `app.config.js`:
+
+```json
+{
+  "expo": {
+    "scheme": "myapp",
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "origin": "..."
+        }
+      ]
+    ]
+  }
+}
+```
+
+### Handling the OAuth Callback
+
 ```javascript
-// In your app component or auth callback page
+// In your app (e.g., App.js or auth callback screen)
 import { useEffect } from 'react';
-import { useRouter } from 'next/router'; // or useSearchParams in React
+import * as Linking from 'expo-linking';
+import { useNavigation } from '@react-navigation/native';
 
 function App() {
-  const router = useRouter();
-  
   useEffect(() => {
-    const { name, email, avatar, authenticated } = router.query;
+    // Listen for deep link events
+    const subscription = Linking.addEventListener('url', handleDeepLink);
     
-    if (authenticated === 'true') {
-      // Store user info in state/context/localStorage
+    // Check if app was opened with a URL
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeepLink({ url });
+      }
+    });
+    
+    return () => subscription.remove();
+  }, []);
+  
+  const handleDeepLink = ({ url }) => {
+    // Parse the URL
+    const { queryParams } = Linking.parse(url);
+    
+    if (queryParams?.authenticated === 'true') {
       const user = {
-        name: decodeURIComponent(name),
-        email: decodeURIComponent(email),
-        avatar: decodeURIComponent(avatar)
+        name: decodeURIComponent(queryParams.name || ''),
+        email: decodeURIComponent(queryParams.email || ''),
+        avatar: decodeURIComponent(queryParams.avatar || '')
       };
       
-      // Save to your state management
-      // setUser(user);
-      // localStorage.setItem('user', JSON.stringify(user));
-      
+      // Save user to state/AsyncStorage
       console.log('User logged in:', user);
+      // navigation.navigate('Home', { user });
     }
-  }, [router.query]);
+  };
   
-  return <div>Your App</div>;
+  return <YourApp />;
 }
+```
+
+### Opening OAuth in Browser
+
+```javascript
+import * as WebBrowser from 'expo-web-browser';
+import { Button } from 'react-native';
+
+const handleLogin = async (provider) => {
+  // Open OAuth in system browser
+  const result = await WebBrowser.openAuthSessionAsync(
+    `https://your-backend.herokuapp.com/oauth2/authorization/${provider}`,
+    'exp://localhost:8081' // or 'myapp://auth/callback' in production
+  );
+  
+  if (result.type === 'success') {
+    // The redirect will be handled by the deep link listener
+    console.log('OAuth success:', result.url);
+  }
+};
+
+// In your component
+<Button title="Login with GitHub" onPress={() => handleLogin('github')} />
+<Button title="Login with Google" onPress={() => handleLogin('google')} />
 ```
 
 ## Additional API Endpoints
