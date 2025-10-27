@@ -95,7 +95,13 @@ class SecurityConfig {
                     String avatar = principal.getAttribute("avatar_url") ?: principal.getAttribute("picture") ?: ""
                     
                     log.info("✅ OAuth login successful for user: {}", name)
-                    log.info("🔄 Redirecting to frontend: {}", frontendUrl)
+                    log.info("🔄 Frontend URL configured: {}", frontendUrl)
+                    
+                    // Check if frontendUrl is configured
+                    if (frontendUrl == null || frontendUrl.isEmpty()) {
+                        log.warn("⚠️ FRONTEND_URL not configured, falling back to /dashboard")
+                        return "/dashboard"
+                    }
                     
                     // Build redirect URL with user info as query parameters
                     String redirectUrl = frontendUrl + 
@@ -104,7 +110,7 @@ class SecurityConfig {
                         "&avatar=" + URLEncoder.encode(avatar, StandardCharsets.UTF_8.toString()) +
                         "&authenticated=true"
                     
-                    log.info("Redirect URL: {}", redirectUrl)
+                    log.info("✅ Redirect URL: {}", redirectUrl)
                     return redirectUrl
                 } catch (Exception e) {
                     log.error("❌ Error in OAuth success handler: {}", e.getMessage(), e)
