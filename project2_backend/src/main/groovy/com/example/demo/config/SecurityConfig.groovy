@@ -83,6 +83,9 @@ class SecurityConfig {
 
     @Bean
     AuthenticationSuccessHandler oauthSuccessHandler() {
+        // Capture the frontendUrl in a local variable for closure access
+        final String redirectBaseUrl = frontendUrl
+        
         return new SimpleUrlAuthenticationSuccessHandler() {
             @Override
             protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -95,16 +98,16 @@ class SecurityConfig {
                     String avatar = principal.getAttribute("avatar_url") ?: principal.getAttribute("picture") ?: ""
                     
                     log.info("✅ OAuth login successful for user: {}", name)
-                    log.info("🔄 Frontend URL configured: {}", frontendUrl)
+                    log.info("🔄 Frontend URL configured: {}", redirectBaseUrl)
                     
                     // Check if frontendUrl is configured
-                    if (frontendUrl == null || frontendUrl.isEmpty()) {
+                    if (redirectBaseUrl == null || redirectBaseUrl.isEmpty()) {
                         log.warn("⚠️ FRONTEND_URL not configured, falling back to /dashboard")
                         return "/dashboard"
                     }
                     
                     // Build redirect URL with user info as query parameters
-                    String redirectUrl = frontendUrl + 
+                    String redirectUrl = redirectBaseUrl + 
                         "?name=" + URLEncoder.encode(name, StandardCharsets.UTF_8.toString()) +
                         "&email=" + URLEncoder.encode(email, StandardCharsets.UTF_8.toString()) +
                         "&avatar=" + URLEncoder.encode(avatar, StandardCharsets.UTF_8.toString()) +
