@@ -92,6 +92,38 @@ class AuthRestController {
         ]
     }
 
+    @GetMapping("/api/auth/success")
+    Map<String, Object> loginSuccess(@AuthenticationPrincipal OAuth2User principal) {
+        if (principal == null) {
+            return [
+                authenticated: false,
+                message: "Not authenticated"
+            ]
+        }
+        
+        return [
+            authenticated: true,
+            message: "Successfully authenticated",
+            user: [
+                name: principal.getAttribute("name") ?: principal.getAttribute("login"),
+                email: principal.getAttribute("email"),
+                avatar: principal.getAttribute("avatar_url") ?: principal.getAttribute("picture"),
+                provider: getProvider(principal)
+            ]
+        ]
+    }
+
+    @GetMapping("/api/auth/status")
+    Map<String, Object> authStatus(@AuthenticationPrincipal OAuth2User principal) {
+        boolean isAuthenticated = principal != null
+        
+        return [
+            authenticated: isAuthenticated,
+            provider: isAuthenticated ? getProvider(principal) : null,
+            message: isAuthenticated ? "User is authenticated" : "User is not authenticated"
+        ]
+    }
+
     @GetMapping("/api/public/status")
     Map<String, Object> publicStatus() {
         return [
