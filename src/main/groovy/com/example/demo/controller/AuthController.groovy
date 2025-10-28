@@ -1,9 +1,7 @@
 package com.example.demo.controller
 
-import com.example.demo.security.JwtTokenProvider
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Controller
@@ -78,9 +76,6 @@ class AuthController {
 @RestController
 class AuthRestController {
 
-    @Autowired
-    private JwtTokenProvider tokenProvider
-
     @GetMapping("/api/user")
     Map<String, Object> user(@AuthenticationPrincipal OAuth2User principal) {
         if (principal == null) {
@@ -97,29 +92,35 @@ class AuthRestController {
         ]
     }
 
-    // returns jwt token for mobile endpoint
-    @GetMapping("/api/auth/token")
-    Map<String, Object> getToken(@AuthenticationPrincipal OAuth2User principal) {
+    @GetMapping("/api/auth/success")
+    Map<String, Object> loginSuccess(@AuthenticationPrincipal OAuth2User principal) {
         if (principal == null) {
             return [
-                error: "Not authenticated",
-                message: "You must be logged in to get a token"
+                authenticated: false,
+                message: "Not authenticated"
             ]
         }
         
-        // Get username from OAuth2User
-        String username = principal.getAttribute("email") ?: 
-                         principal.getAttribute("login") ?: 
-                         principal.getAttribute("name") ?: 
-                         "User"
-        
-        // Generate JWT token
-        String token = tokenProvider.generateToken(username)
+        return [
+            authenticated: true,
+            message: "Successfully authenticated",
+            user: [
+                name: principal.getAttribute("name") ?: principal.getAttribute("login"),
+                email: principal.getAttribute("email"),
+                avatar: principal.getAttribute("avatar_url") ?: principal.getAttribute("picture"),
+                provider: getProvider(principal)
+            ]
+        ]
+    }
+
+    @GetMapping("/api/auth/status")
+    Map<String, Object> authStatus(@AuthenticationPrincipal OAuth2User principal) {
+        boolean isAuthenticated = principal != null
         
         return [
-            token: token,
-            username: username,
-            expiresIn: 86400000 
+            authenticated: isAuthenticated,
+            provider: isAuthenticated ? getProvider(principal) : null,
+            message: isAuthenticated ? "User is authenticated" : "User is not authenticated"
         ]
     }
 

@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.ComponentScan
 
+// OAuth2 is enabled for 'postman' and 'prod' profiles, disabled for default local dev
 @SpringBootApplication
 //just to find the package, without this it cant find the DataLoader class
 @ComponentScan(basePackages = ["com.example.demo", "main.groovy.com.example.demo.loader"])
