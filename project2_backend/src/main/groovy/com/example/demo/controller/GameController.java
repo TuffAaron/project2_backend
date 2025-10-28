@@ -82,7 +82,7 @@ public class GameController {
     }
 
     @GetMapping("/team/{teamId}")
-    public Map<String, Object> getGamesByTeam(@PathVariable Long teamId, @AuthenticationPrincipal OAuth2User principal) {
+    public Map<String, Object> getGamesByTeam(@PathVariable ("teamId") Long teamId, @AuthenticationPrincipal OAuth2User principal) {
         Map<String, Object> response = new HashMap<>();
         
         try {
@@ -104,7 +104,7 @@ public class GameController {
     }
 
     @GetMapping("/{gameId}")
-    public ResponseEntity<Map<String, Object>> getGameById(@PathVariable String gameId, @AuthenticationPrincipal OAuth2User principal) {
+    public ResponseEntity<Map<String, Object>> getGameById(@PathVariable("gameId") String gameId, @AuthenticationPrincipal OAuth2User principal) {
         Map<String, Object> response = new HashMap<>();
         
         try {
