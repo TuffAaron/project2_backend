@@ -159,7 +159,7 @@ public class GameController {
 
     // PUT - Update entire game (replace)
     @PutMapping("/{gameId}")
-    public ResponseEntity<Map<String, Object>> updateGame(@PathVariable String gameId, @RequestBody Game game, @AuthenticationPrincipal OAuth2User principal) {
+    public ResponseEntity<Map<String, Object>> updateGame(@PathVariable("gameId") String gameId, @RequestBody Game game, @AuthenticationPrincipal OAuth2User principal) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -187,7 +187,7 @@ public class GameController {
 
     // PATCH - Partially update game
     @PatchMapping("/{gameId}")
-    public ResponseEntity<Map<String, Object>> patchGame(@PathVariable String gameId, @RequestBody Game gameUpdates, @AuthenticationPrincipal OAuth2User principal) {
+    public ResponseEntity<Map<String, Object>> patchGame(@PathVariable("gameId") String gameId, @RequestBody Game gameUpdates, @AuthenticationPrincipal OAuth2User principal) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -215,7 +215,7 @@ public class GameController {
 
     // DELETE - Delete a game
     @DeleteMapping("/{gameId}")
-    public ResponseEntity<Map<String, Object>> deleteGame(@PathVariable String gameId, @AuthenticationPrincipal OAuth2User principal) {
+    public ResponseEntity<Map<String, Object>> deleteGame(@PathVariable("gameId") String gameId, @AuthenticationPrincipal OAuth2User principal) {
         Map<String, Object> response = new HashMap<>();
 
         try {
