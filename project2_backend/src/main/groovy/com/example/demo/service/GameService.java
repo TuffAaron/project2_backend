@@ -1,17 +1,78 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Game;
+import com.example.demo.model.Team;
 import com.example.demo.repository.GameRepository;
+import com.example.demo.repository.TeamRepository;
+import com.example.demo.dto.GameDTO;
+import com.example.demo.dto.GameDTO.TeamInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class GameService {
     
     @Autowired
     private GameRepository gameRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
+
+    public List<GameDTO> getGamesByTeamWithDetails(Long teamId){
+        List<Game> games = gameRepository.findByHomeTeamIdOrAwayTeamId(teamId, teamId);
+        return games.stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+    }
+
+    public GameDTO getGameByIdWithDetails(String gameId){
+        Game game = gameRepository.findById(gameId).orElse(null);
+        return game != null ? convertToDTO(game) : null;
+    }
+
+    private GameDTO convertToDTO(Game game){
+        Team homeTeam = teamRepository.findById(game.getHomeTeamId())
+            .orElse(createDefaultTeam(game.getHomeTeamId()));
+        
+        Team awayTeam = teamRepository.findById(game.getAwayTeamId())
+            .orElse(createDefaultTeam(game.getAwayTeamId()));
+        
+        TeamInfo homeTeamInfo = new TeamInfo(
+            homeTeam.getTeamId(),
+            homeTeam.getTeamName(),
+            homeTeam.getTeamTricode(),
+            homeTeam.getLogo(),
+            game.getHomeTeamScore()
+        );
+        
+        TeamInfo awayTeamInfo = new TeamInfo(
+            awayTeam.getTeamId(),
+            awayTeam.getTeamName(),
+            awayTeam.getTeamTricode(),
+            awayTeam.getLogo(),
+            game.getAwayTeamScore()
+        );
+        
+        return new GameDTO(
+            game.getGameId(),
+            game.getGameDateTimeEst(),
+            game.getGameStatusText(),
+            homeTeamInfo,
+            awayTeamInfo
+        );
+    }
+
+    private Team createDefaultTeam(Long teamId) {
+        Team team = new Team();
+        team.setTeamId(teamId);
+        team.setTeamName("Unknown Team");
+        team.setTeamTricode("???");
+        team.setLogo("");
+        return team;
+    }
 
     public List<Game> getGamesByTeam(Long teamId) {
         // Find games where the team is either home or away team

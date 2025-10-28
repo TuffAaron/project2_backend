@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.GameDTO;
 import com.example.demo.model.Game;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,7 @@ public class GameController {
         Map<String, Object> response = new HashMap<>();
         
         try {
-            List<Game> games = gameService.getGamesByTeam(teamId);
+            List<GameDTO> games = gameService.getGamesByTeamWithDetails(teamId);
             response.put("status", "success");
             response.put("teamId", teamId);
             response.put("games", games);
@@ -108,7 +109,7 @@ public class GameController {
         Map<String, Object> response = new HashMap<>();
         
         try {
-            Game game = gameService.getGameById(gameId);
+            GameDTO game = gameService.getGameByIdWithDetails(gameId);
             if (game != null) {
                 response.put("status", "success");
                 response.put("game", game);
