@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.GameDTO;
 import com.example.demo.model.Game;
 import java.util.List;
 import java.util.Map;
@@ -82,11 +83,11 @@ public class GameController {
     }
 
     @GetMapping("/team/{teamId}")
-    public Map<String, Object> getGamesByTeam(@PathVariable Long teamId, @AuthenticationPrincipal OAuth2User principal) {
+    public Map<String, Object> getGamesByTeam(@PathVariable ("teamId") Long teamId, @AuthenticationPrincipal OAuth2User principal) {
         Map<String, Object> response = new HashMap<>();
         
         try {
-            List<Game> games = gameService.getGamesByTeam(teamId);
+            List<GameDTO> games = gameService.getGamesByTeamWithDetails(teamId);
             response.put("status", "success");
             response.put("teamId", teamId);
             response.put("games", games);
@@ -104,11 +105,11 @@ public class GameController {
     }
 
     @GetMapping("/{gameId}")
-    public ResponseEntity<Map<String, Object>> getGameById(@PathVariable String gameId, @AuthenticationPrincipal OAuth2User principal) {
+    public ResponseEntity<Map<String, Object>> getGameById(@PathVariable("gameId") String gameId, @AuthenticationPrincipal OAuth2User principal) {
         Map<String, Object> response = new HashMap<>();
         
         try {
-            Game game = gameService.getGameById(gameId);
+            GameDTO game = gameService.getGameByIdWithDetails(gameId);
             if (game != null) {
                 response.put("status", "success");
                 response.put("game", game);
@@ -159,7 +160,7 @@ public class GameController {
 
     // PUT - Update entire game (replace)
     @PutMapping("/{gameId}")
-    public ResponseEntity<Map<String, Object>> updateGame(@PathVariable String gameId, @RequestBody Game game, @AuthenticationPrincipal OAuth2User principal) {
+    public ResponseEntity<Map<String, Object>> updateGame(@PathVariable("gameId") String gameId, @RequestBody Game game, @AuthenticationPrincipal OAuth2User principal) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -187,7 +188,7 @@ public class GameController {
 
     // PATCH - Partially update game
     @PatchMapping("/{gameId}")
-    public ResponseEntity<Map<String, Object>> patchGame(@PathVariable String gameId, @RequestBody Game gameUpdates, @AuthenticationPrincipal OAuth2User principal) {
+    public ResponseEntity<Map<String, Object>> patchGame(@PathVariable("gameId") String gameId, @RequestBody Game gameUpdates, @AuthenticationPrincipal OAuth2User principal) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -215,7 +216,7 @@ public class GameController {
 
     // DELETE - Delete a game
     @DeleteMapping("/{gameId}")
-    public ResponseEntity<Map<String, Object>> deleteGame(@PathVariable String gameId, @AuthenticationPrincipal OAuth2User principal) {
+    public ResponseEntity<Map<String, Object>> deleteGame(@PathVariable("gameId") String gameId, @AuthenticationPrincipal OAuth2User principal) {
         Map<String, Object> response = new HashMap<>();
 
         try {
