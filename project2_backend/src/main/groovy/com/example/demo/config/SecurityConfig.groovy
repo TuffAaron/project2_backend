@@ -1,9 +1,12 @@
 package com.example.demo.config
 
+import com.example.demo.security.JwtAuthenticationFilter
+import com.example.demo.security.JwtTokenProvider
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -14,9 +17,12 @@ import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.util.Arrays
 
 @Configuration
@@ -27,6 +33,15 @@ class SecurityConfig {
 
     @Value('${APP_BASE_URL:http://localhost:8080}')
     private String baseUrl
+
+    @Value('${frontend.url:exp://localhost:8081}')
+    private String frontendUrl
+    
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter
+    
+    @Autowired
+    private JwtTokenProvider tokenProvider
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -40,7 +55,8 @@ class SecurityConfig {
                     .requestMatchers("/", "/home", "/public/**", "/error", "/h2-console/**", "/test").permitAll()
                     .requestMatchers("/api/public/**").permitAll()
                     .requestMatchers("/login", "/login/**", "/oauth2/**", "/login/oauth2/**").permitAll()
-                    // Protected endpoints - only /dashboard not /dashboard/**
+                    // Protected endpoints
+                    .requestMatchers("/api/auth/token").authenticated()
                     .requestMatchers("/dashboard", "/profile").authenticated()
                     .requestMatchers("/api/games/**", "/api/teams/**").authenticated()
                     .requestMatchers("/api/user").authenticated()
@@ -50,7 +66,7 @@ class SecurityConfig {
             .oauth2Login { oauth2 ->
                 oauth2
                     .loginPage("/login")
-                    .defaultSuccessUrl("/dashboard", true)
+                    .successHandler(oauthSuccessHandler())
                     .failureHandler { request, response, exception ->
                         def logger = LoggerFactory.getLogger(SecurityConfig.class)
                         logger.error("❌ OAuth2 login failed: {}", exception.getMessage(), exception)
@@ -66,21 +82,70 @@ class SecurityConfig {
                     .deleteCookies("JSESSIONID", "remember-me")
                     .permitAll()
             }
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .csrf { csrf ->
-                csrf.disable() // Temporarily disable to troubleshoot OAuth
+                csrf.disable()
             }
             .headers { headers ->
-                headers.frameOptions().disable() // Allow H2 console iframe
+                headers.frameOptions().disable()
             }
 
         return http.build()
     }
 
     @Bean
+    AuthenticationSuccessHandler oauthSuccessHandler() {
+        // Capture dependencies in local variables for closure access
+        final String redirectBaseUrl = frontendUrl
+        final JwtTokenProvider jwtProvider = tokenProvider
+        
+        return new SimpleUrlAuthenticationSuccessHandler() {
+            @Override
+            protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+                try {
+                    OAuth2User principal = (OAuth2User) authentication.getPrincipal()
+                    
+                    // Extract user info
+                    String name = principal.getAttribute("name") ?: principal.getAttribute("login") ?: "User"
+                    String email = principal.getAttribute("email") ?: ""
+                    String avatar = principal.getAttribute("avatar_url") ?: principal.getAttribute("picture") ?: ""
+                    
+                    log.info("✅ OAuth login successful for user: {}", name)
+                    log.info("🔄 Frontend URL configured: {}", redirectBaseUrl)
+                    
+                    // Check if frontendUrl is configured (mobile app)
+                    if (redirectBaseUrl == null || redirectBaseUrl.isEmpty() || !redirectBaseUrl.startsWith("exp://")) {
+                        log.warn("⚠️ FRONTEND_URL not configured or not mobile, falling back to /dashboard")
+                        return "/dashboard"
+                    }
+                    
+                    // Generate JWT token for mobile
+                    String username = email ?: name
+                    String token = jwtProvider.generateToken(username)
+                    log.info("🔑 Generated JWT token for mobile app")
+                    
+                    // Build redirect URL with user info AND token as query parameters
+                    String redirectUrl = redirectBaseUrl + 
+                        "?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8.toString()) +
+                        "&name=" + URLEncoder.encode(name, StandardCharsets.UTF_8.toString()) +
+                        "&email=" + URLEncoder.encode(email, StandardCharsets.UTF_8.toString()) +
+                        "&avatar=" + URLEncoder.encode(avatar, StandardCharsets.UTF_8.toString()) +
+                        "&authenticated=true"
+                    
+                    log.info("✅ Redirect URL with token: {}", redirectUrl.substring(0, Math.min(100, redirectUrl.length())))
+                    return redirectUrl
+                } catch (Exception e) {
+                    log.error("❌ Error in OAuth success handler: {}", e.getMessage(), e)
+                    return "/dashboard"
+                }
+            }
+        }
+    }
+
+    @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration()
         
-        // Allow specific origins (including your ngrok/production URLs)
         configuration.setAllowedOriginPatterns(Arrays.asList(
             "http://localhost:*",
             "https://*.ngrok.io",
@@ -90,48 +155,12 @@ class SecurityConfig {
             baseUrl
         ))
         
-        // Allow common HTTP methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"))
-        
-        // Allow common headers
         configuration.setAllowedHeaders(Arrays.asList("*"))
-        
-        // Allow credentials for OAuth2
         configuration.setAllowCredentials(true)
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
         return source
-    }
-
-    @Bean
-    AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return new AuthenticationSuccessHandler() {
-            @Override
-            void onAuthenticationSuccess(HttpServletRequest request, 
-                                        HttpServletResponse response, 
-                                        Authentication authentication) throws IOException {
-                try {
-                    // Log successful authentication
-                    OAuth2User user = (OAuth2User) authentication.getPrincipal()
-                    String name = user.getAttribute("name") ?: user.getAttribute("login") ?: "Unknown"
-                    String email = user.getAttribute("email") ?: "No email"
-                    
-                    log.info("✅ OAuth2 login successful - User: {}, Email: {}", name, email)
-                    log.debug("User attributes: {}", user.getAttributes())
-                    
-                    // Simple redirect without any session manipulation
-                    String redirectUrl = "/dashboard"
-                    log.info("Redirecting to: {}", redirectUrl)
-                    
-                    response.sendRedirect(redirectUrl)
-                    
-                } catch (Exception e) {
-                    log.error("❌ Error in authentication success handler: {}", e.getMessage(), e)
-                    // Redirect to home with error parameter
-                    response.sendRedirect("/?error=auth_handler")
-                }
-            }
-        }
     }
 }
