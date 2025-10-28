@@ -38,10 +38,12 @@ class SecurityConfig {
             }
             .authorizeHttpRequests { authz ->
                 authz
-                    // Public endpoints - allow all for local development
-                    .requestMatchers("/**").permitAll()
+                    // Public endpoints
+                    .requestMatchers("/", "/login", "/error", "/api/status", "/api/health").permitAll()
+                    // Protected endpoints - require authentication
+                    .requestMatchers("/api/**", "/dashboard", "/profile").authenticated()
+                    .anyRequest().permitAll()
             }
-            /* OAuth2 Login - Disabled for local development, enabled in production
             .oauth2Login { oauth2 ->
                 oauth2
                     .loginPage("/login")
@@ -52,7 +54,6 @@ class SecurityConfig {
                         response.sendRedirect("/login?error=true")
                     }
             }
-            */
             .logout { logout ->
                 logout
                     .logoutUrl("/logout")
